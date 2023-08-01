@@ -22,12 +22,12 @@ void SResUtility::SGCResourceManager::Init()
 
 GCarcfile* SResUtility::SGCResourceManager::GetFile(GCarchive* archive, std::filesystem::path filepath){
 	int dirID = 0;
-	for(std::string component : filepath){
+	for(std::filesystem::path component : filepath){
 		for (GCarcfile* file = &archive->files[archive->dirs[dirID].fileoff]; file < &archive->files[archive->dirs[dirID].fileoff] + archive->dirs[dirID].filenum; file++){
-			if(strcmp(file->name, component.c_str()) == 0 && (file->attr & 0x02)){
+			if(strcmp(file->name, component.string().c_str()) == 0 && (file->attr & 0x02)){
 				dirID = file->size;
 				break;
-			} else if(strcmp(file->name, component.c_str()) == 0 && !(file->attr & 0x02)) {
+			} else if(strcmp(file->name, component.string().c_str()) == 0 && !(file->attr & 0x02)) {
 				return file;
 			}
 		}

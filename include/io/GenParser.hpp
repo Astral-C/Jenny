@@ -536,7 +536,7 @@ struct PGenerator {
     PGenVersion ver;         // Generator version
     int reserved;            // Affects loading behavior, 0 = Loads once, (1, ..) = Can load multiple times, 
                              // (.., -1) = An affront to GOD that is somehow used
-    uint respawnDays;        // 0 = always spawn, even after leaving cave, (1, ..) = Wait this many days to respawn
+    uint32_t respawnDays;        // 0 = always spawn, even after leaving cave, (1, ..) = Wait this many days to respawn
     // ubyte[] comment; #NOT NECESSARY FOR OBJECT OPERATION
     glm::vec3 pos;                // Spawn position of object
     glm::vec3 offset;             // Position offset from spawn position
@@ -549,7 +549,7 @@ struct PGenCollection {
     PGenVersion ver;       // The file version
     glm::vec3 startPos;         // XYZ starting position of generator
     float startDir;        // Starting angle of generator
-    uint numGen;           // Number of objects contained
+    uint32_t numGen;           // Number of objects contained
     std::vector<std::shared_ptr<PGenerator>> generators; // Generator Object array
 };
 

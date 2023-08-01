@@ -119,12 +119,12 @@ void PMapManager::LoadAssets(){
 
 	for(auto dir : std::filesystem::directory_iterator(Options.mRootDir / std::filesystem::path("files/enemy/data/"))){
 		std::cout << "Loading enemy Model " << dir << std::endl;
-		LoadEnemy(dir.path().filename());
+		LoadEnemy(dir.path().filename().string());
 	}
 
 	for(auto dir : std::filesystem::directory_iterator(Options.mRootDir / std::filesystem::path("files/user/Abe/Pellet/us/"))){
 		std::cout << "Loading treasure Model " << dir << std::endl;
-		if(dir.path().extension() == ".szs") LoadTreasure(dir.path().filename());
+		if(dir.path().extension() == ".szs") LoadTreasure(dir.path().filename().string());
 	}
 
 	loadedAssets = true;
@@ -197,16 +197,16 @@ void PMapManager::ParseGens(std::filesystem::path genPath){
 	for(auto dir : std::filesystem::directory_iterator(genPath / "loop")){
 		std::cout << "Loading loop gens " << dir << std::endl;
 		if(dir.path().extension() == ".txt"){
-			loops.insert({dir.path().stem(), PGenParser::ParseGenFile(dir.path())});
-			loopVisibility.insert({dir.path().stem(), false});
+			loops.insert({dir.path().stem().string(), PGenParser::ParseGenFile(dir.path())});
+			loopVisibility.insert({dir.path().stem().string(), false});
 		}
 	}
 
 	for(auto dir : std::filesystem::directory_iterator(genPath / "nonloop")){
 		std::cout << "Loading nonloop gens " << dir << std::endl;
 		if(dir.path().extension() == ".txt"){
-			nonloops.insert({dir.path().stem(), PGenParser::ParseGenFile(dir.path())});
-			nonLoopVisibility.insert({dir.path().stem(), false});
+			nonloops.insert({dir.path().stem().string(), PGenParser::ParseGenFile(dir.path())});
+			nonLoopVisibility.insert({dir.path().stem().string(), false});
 		}
 	}
 
