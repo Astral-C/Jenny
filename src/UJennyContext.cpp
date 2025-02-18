@@ -124,9 +124,9 @@ void UJennyContext::Render(float deltaTime) {
 	}
 
 	for(auto [loopName, loop] : mMapManager.loops){
-		ImGui::Checkbox(fmt::format("##renderLoop{}", loopName).c_str(), &mMapManager.loopVisibility[loopName]);
+		ImGui::Checkbox(std::format("##renderLoop{}", loopName).c_str(), &mMapManager.loopVisibility[loopName]);
 		ImGui::SameLine();
-		if(ImGui::TreeNode(fmt::format("Loop {}", loopName).c_str())){
+		if(ImGui::TreeNode(std::format("Loop {}", loopName).c_str())){
 			for(auto gen : loop.generators){
 				ImGui::TextColored((selected == gen ? ImVec4(0.0,1.0,0.0,1.0) : ImVec4(1.0,1.0,1.0,1.0)), gen->GetName().c_str());
 				if(ImGui::IsItemClicked(0)){
@@ -138,9 +138,9 @@ void UJennyContext::Render(float deltaTime) {
 	}
 
 	for(auto [loopName, loop] : mMapManager.nonloops){
-		ImGui::Checkbox(fmt::format("##renderNonLoop{}", loopName).c_str(), &mMapManager.nonLoopVisibility[loopName]);
+		ImGui::Checkbox(std::format("##renderNonLoop{}", loopName).c_str(), &mMapManager.nonLoopVisibility[loopName]);
 		ImGui::SameLine();
-		if(ImGui::TreeNode(fmt::format("NonLoop {}", loopName).c_str())){
+		if(ImGui::TreeNode(std::format("NonLoop {}", loopName).c_str())){
 			for(auto gen : loop.generators){
 				ImGui::TextColored((selected == gen ? ImVec4(0.0,1.0,0.0,1.0) : ImVec4(1.0,1.0,1.0,1.0)), gen->GetName().c_str());
 				if(ImGui::IsItemClicked(0)){

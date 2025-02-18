@@ -17,77 +17,94 @@ PMapManager::~PMapManager(){
 
 
 void PMapManager::LoadEnemy(std::string modelDirName){
-	std::filesystem::path modelPath = (Options.mRootDir / std::filesystem::path(fmt::format("files/enemy/data/{}/model.szs", modelDirName)));
+	std::filesystem::path modelPath = (Options.mRootDir / std::filesystem::path(std::format("files/enemy/data/{}/model.szs", modelDirName)));
 	
 	std::cout << modelPath.string() << std::endl;
 
 	if(!std::filesystem::exists(modelPath)) return;
 
-	GCarchive modelArchive;
-	GCResourceManager.LoadArchive(modelPath.string().c_str(), &modelArchive);
+	std::shared_ptr<Archive::Rarc> arc = Archive::Rarc::Create();
+	
+	bStream::CFileStream arcStream(modelPath.string(), bStream::Endianess::Big, bStream::OpenMode::In);
+	if(!arc->Load(&arcStream)){
+		return;
+	}
 
-	GCarcfile* bmdModel = GCResourceManager.GetFirstFileWithExtension(&modelArchive, ".bmd");//= GCResourceManager.GetFile(&modelArchive, std::filesystem::path("enemy.bmd"));
+	std::shared_ptr<Archive::File> bmdModel = nullptr;
+	for(auto file : arc->GetRoot()->GetFiles()){
+		if(std::filesystem::path(file->GetName()).extension() == ".bmd"){
+			bmdModel = file;
+			break;
+		}
+	} 
 
 	if(bmdModel != nullptr){
 		J3DModelLoader Loader;
-		bStream::CMemoryStream modelStream((uint8_t*)bmdModel->data, bmdModel->size, bStream::Endianess::Big, bStream::OpenMode::In);
+		bStream::CMemoryStream modelStream((uint8_t*)bmdModel->GetData(), bmdModel->GetSize(), bStream::Endianess::Big, bStream::OpenMode::In);
 				
 		auto data = std::make_shared<J3DModelData>();
 		data = Loader.Load(&modelStream, NULL);
 		ModelCache.insert({modelDirName, data});
 		std::cout << "[JENNY]: Loaded model " << modelDirName << std::endl;
 	}
-
-	gcFreeArchive(&modelArchive);
 }
 
 void PMapManager::LoadTreasure(std::string modelArchiveName){
-	std::filesystem::path modelPath = (Options.mRootDir / std::filesystem::path(fmt::format("files/user/Abe/Pellet/us/{}", modelArchiveName)));
+	std::filesystem::path modelPath = (Options.mRootDir / std::filesystem::path(std::format("files/user/Abe/Pellet/us/{}", modelArchiveName)));
 	
 	std::cout << modelPath.string() << std::endl;
 
 	if(!std::filesystem::exists(modelPath)) return;
 
-	GCarchive modelArchive;
-	GCResourceManager.LoadArchive(modelPath.string().c_str(), &modelArchive);
+	std::shared_ptr<Archive::Rarc> arc = Archive::Rarc::Create();
+	
+	bStream::CFileStream arcStream(modelPath.string(), bStream::Endianess::Big, bStream::OpenMode::In);
+	if(!arc->Load(&arcStream)){
+		return;
+	}
 
-	//GCarcfile* bmdModel = GCResourceManager.GetFile(&modelArchive, std::filesystem::path(modelPath.stem().string() + ".bmd"));
-	GCarcfile* bmdModel = GCResourceManager.GetFirstFileWithExtension(&modelArchive, ".bmd");
+	std::shared_ptr<Archive::File> bmdModel = nullptr;
+	for(auto file : arc->GetRoot()->GetFiles()){
+		if(std::filesystem::path(file->GetName()).extension() == ".bmd"){
+			bmdModel = file;
+			break;
+		}
+	} 
 
 	if(bmdModel != nullptr){
 		J3DModelLoader Loader;
-		bStream::CMemoryStream modelStream((uint8_t*)bmdModel->data, bmdModel->size, bStream::Endianess::Big, bStream::OpenMode::In);
+		bStream::CMemoryStream modelStream((uint8_t*)bmdModel->GetData(), bmdModel->GetSize(), bStream::Endianess::Big, bStream::OpenMode::In);
 				
 		auto data = std::make_shared<J3DModelData>();
 		data = Loader.Load(&modelStream, NULL);
-		ModelCache.insert({modelPath.stem().string(), data});
-		std::cout << "[JENNY]: Loaded model " << modelPath.stem().string() << std::endl;
+		ModelCache.insert({modelArchiveName, data});
+		std::cout << "[JENNY]: Loaded model " << modelArchiveName << std::endl;
 	}
-
-	gcFreeArchive(&modelArchive);
 }
 
 void PMapManager::LoadKandoModel(std::string modelDirName, std::string modelName, std::string cacheName, std::string archiveName=""){
-	std::filesystem::path modelPath = (Options.mRootDir / std::filesystem::path(fmt::format("files/user/Kando/{0}/{1}.szs", modelDirName, archiveName == "" ? "arc" : archiveName)));
+	std::filesystem::path modelPath = (Options.mRootDir / std::filesystem::path(std::format("files/user/Kando/{0}/{1}.szs", modelDirName, archiveName == "" ? "arc" : archiveName)));
 	
 	std::cout << modelPath.string() << std::endl;
 
-	GCarchive modelArchive;
-	GCResourceManager.LoadArchive(modelPath.string().c_str(), &modelArchive);
+	std::shared_ptr<Archive::Rarc> arc = Archive::Rarc::Create();
+	
+	bStream::CFileStream arcStream(modelPath.string(), bStream::Endianess::Big, bStream::OpenMode::In);
+	if(!arc->Load(&arcStream)){
+		return;
+	}
 
-	GCarcfile* bmdModel = GCResourceManager.GetFile(&modelArchive, std::filesystem::path(modelName));
+	std::shared_ptr<Archive::File> bmdModel = arc->GetFile(modelName);
 
 	if(bmdModel != nullptr){
 		J3DModelLoader Loader;
-		bStream::CMemoryStream modelStream((uint8_t*)bmdModel->data, bmdModel->size, bStream::Endianess::Big, bStream::OpenMode::In);
+		bStream::CMemoryStream modelStream((uint8_t*)bmdModel->GetData(), bmdModel->GetSize(), bStream::Endianess::Big, bStream::OpenMode::In);
 				
 		auto data = std::make_shared<J3DModelData>();
 		data = Loader.Load(&modelStream, NULL);
 		ModelCache.insert({cacheName, data});
 		std::cout << "[JENNY]: Loaded model " << modelName << std::endl;
 	}
-
-	gcFreeArchive(&modelArchive);
 }
 
 void PMapManager::LoadAssets(){
@@ -140,8 +157,8 @@ void PMapManager::LoadMap(std::string mapName){
 	loopVisibility.clear();
 	nonLoopVisibility.clear();
 
-	std::filesystem::path mapPath = (Options.mRootDir / std::filesystem::path(fmt::format("files/user/Kando/map/{}/", mapName)));
-	std::filesystem::path mapGenPath = (Options.mRootDir / std::filesystem::path(fmt::format("files/user/Abe/map/{}/", mapName)));
+	std::filesystem::path mapPath = (Options.mRootDir / std::filesystem::path(std::format("files/user/Kando/map/{}/", mapName)));
+	std::filesystem::path mapGenPath = (Options.mRootDir / std::filesystem::path(std::format("files/user/Abe/map/{}/", mapName)));
 	
 	GCarchive mapArchive;
 	GCResourceManager.LoadArchive((mapPath / "arc.szs").string().c_str(), &mapArchive);
@@ -236,7 +253,7 @@ void PMapManager::ParseGens(std::filesystem::path genPath){
 void PMapManager::RenderGen(std::shared_ptr<PGenerator> gen, float dt){
 	glm::mat4 transform = glm::identity<glm::mat4>();
 	transform = glm::translate(transform, gen->pos);
-	std::shared_ptr<J3DModelData> model;
+	std::shared_ptr<J3DModelInstance> model;
 	switch (gen->entityType)
 	{
 	case ONYN: {
@@ -322,7 +339,7 @@ void PMapManager::RenderGen(std::shared_ptr<PGenerator> gen, float dt){
 			transform = glm::rotate(transform, glm::radians(dwfl->rotation.y), glm::vec3(0,1,0));
 			transform = glm::rotate(transform, glm::radians(dwfl->rotation.z), glm::vec3(0,0,1));
 
-			model = ModelCache[fmt::format("DWFL{}", dwfl->dwflType)];
+			model = ModelCache[std::format("DWFL{}", dwfl->dwflType)];
 		}
 		break;
 	default:
@@ -337,13 +354,11 @@ void PMapManager::RenderGen(std::shared_ptr<PGenerator> gen, float dt){
 }
 
 void PMapManager::RenderMap(float dt, USceneCamera* camera){
+	J3DUniformBufferObject::SetProjAndViewMatrices(projection, view);
 	if(ModelCache.contains("map")){
 		glm::mat4 map = glm::identity<glm::mat4>();
-
-		J3DUniformBufferObject::SetEnvelopeMatrices(ModelCache["map"]->GetRestPose().data(), ModelCache["map"]->GetRestPose().size());		
-		J3DUniformBufferObject::SetModelMatrix(&map);
-
-		ModelCache["map"]->Render(dt);
+		//instance map
+		//ModelCache["map"]->Render(dt);
 	}
 
 	for (auto gen : defaultGens.generators){

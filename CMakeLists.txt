@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.8)
 project(jenny)
-set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 set(CMAKE_BUILD_TYPE Debug)
@@ -18,15 +18,9 @@ file(GLOB_RECURSE JENNY_SRC
     "lib/ImGuiFileDialog/*.cpp"
 )
 
-find_package(Iconv REQUIRED)
+find_package(ICU COMPONENTS uc i18n REQUIRED)
 
 add_executable(jenny ${JENNY_SRC})
-target_include_directories(jenny PUBLIC include include/util lib/glfw/include lib/ImGuiFileDialog lib/libgctools/include lib/fmt/include ${Iconv_INCLUDE_DIRS})
+target_include_directories(jenny PUBLIC include include/util lib/glfw/include lib/ImGuiFileDialog lib/libgctoolsplusplus/include)
 
-if(UNIX)
-target_link_libraries(jenny PUBLIC imgui glfw gctools fmt j3dultra ${ICONV_LIBRARIES})
-endif(UNIX)
-
-if(WIN32)
-target_link_libraries(jenny PUBLIC imgui glfw gctools fmt j3dultra ${ICONV_LIBRARIES} ssp)
-endif(WIN32)
+target_link_libraries(jenny PUBLIC imgui glfw gctools++ j3dultra ICU::uc ICU::i18n)

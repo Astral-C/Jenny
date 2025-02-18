@@ -5,8 +5,9 @@
 #include <vector>
 #include <array>
 #include <map>
-#include <fmt/format.h>
+#include <format>
 #include <glm/glm.hpp>
+#include <J3D/Data/J3DModelInstance.hpp>
 
 const std::string EntityTypeNames[] = {
     "Onion",
@@ -362,6 +363,7 @@ const std::map<std::string, PObjectTag> PObjectTagStr = {
 const std::map<std::string, PGenVersion> PGenVersionStr = {{"{v0.1}", VER1}, {"{v0.3}", VER3}};
 
 struct PEntity {
+    std::shared_ptr<J3DModelInstance> mModel { nullptr };
     virtual std::string GetName(PObjectTag type){ return EntityTypeNames[type]; }
 };
 
@@ -410,7 +412,7 @@ struct PPiki : PEntity {
     uint8_t pikiNumber;
     uint8_t pikiWild; //?
 
-    std::string GetName(PObjectTag type){ return fmt::format("{0} {1} Pikmin", pikiNumber, (pikiColor == 0 ? "Blue" : (pikiColor == 1 ? "Red" : (pikiColor == 2 ? "Yellow" : (pikiColor == 3 ? "Purple" : "White"))))); }
+    std::string GetName(PObjectTag type){ return std::format("{0} {1} Pikmin", pikiNumber, (pikiColor == 0 ? "Blue" : (pikiColor == 1 ? "Red" : (pikiColor == 2 ? "Yellow" : (pikiColor == 3 ? "Purple" : "White"))))); }
 
     PPiki(){}
     ~PPiki(){}
