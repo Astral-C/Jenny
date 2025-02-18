@@ -21,6 +21,6 @@ file(GLOB_RECURSE JENNY_SRC
 find_package(ICU COMPONENTS uc i18n REQUIRED)
 
 add_executable(jenny ${JENNY_SRC})
-target_include_directories(jenny PUBLIC include include/util lib/glfw/include lib/ImGuiFileDialog lib/libgctoolsplusplus/include)
+target_include_directories(jenny PUBLIC include include/util lib/glfw/include lib/ImGuiFileDialog lib/gctoolsplusplus/include lib/J3DUltra/include)
 
 target_link_libraries(jenny PUBLIC imgui glfw gctools++ j3dultra ICU::uc ICU::i18n)

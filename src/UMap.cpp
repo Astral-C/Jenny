@@ -160,29 +160,26 @@ void PMapManager::LoadMap(std::string mapName){
 	std::filesystem::path mapPath = (Options.mRootDir / std::filesystem::path(std::format("files/user/Kando/map/{}/", mapName)));
 	std::filesystem::path mapGenPath = (Options.mRootDir / std::filesystem::path(std::format("files/user/Abe/map/{}/", mapName)));
 	
-	GCarchive mapArchive;
-	GCResourceManager.LoadArchive((mapPath / "arc.szs").string().c_str(), &mapArchive);
+	std::shared_ptr<Archive::Rarc> arc = Archive::Rarc::Create();
 
-	GCarcfile* mapModel = GCResourceManager.GetFile(&mapArchive, "model.bmd");
+	bStream::CFileStream arcStream((mapPath / "arc.szs").string(), bStream::Endianess::Big, bStream::OpenMode::In);
+	if(!arc->Load(&arcStream)){
+		return;
+	}
+
+	std::shared_ptr<Archive::File> mapModel = arc->GetFile("model.bmd");
 
 	if(mapModel != nullptr){
 		J3DModelLoader Loader;
-		bStream::CMemoryStream modelStream((uint8_t*)mapModel->data, mapModel->size, bStream::Endianess::Big, bStream::OpenMode::In);
+		bStream::CMemoryStream modelStream((uint8_t*)mapModel->GetData(), mapModel->GetSize(), bStream::Endianess::Big, bStream::OpenMode::In);
 				
 		auto data = std::make_shared<J3DModelData>();
 		data = Loader.Load(&modelStream, NULL);
 
-		if(ModelCache.contains("map")){
-			ModelCache["map"] = data;
-		} else {
-			ModelCache.insert({"map", data});
-		}
+		mMapModel = data->CreateInstance();
 
 		std::cout << "[JENNY]: Loaded map model" << std::endl;
 	}
-
-	gcFreeArchive(&mapArchive);
-
 
 	// Set up lights from lights.ini?
 
@@ -250,117 +247,10 @@ void PMapManager::ParseGens(std::filesystem::path genPath){
 	std::cout << "Pause" << std::endl;
 }
 
-void PMapManager::RenderGen(std::shared_ptr<PGenerator> gen, float dt){
-	glm::mat4 transform = glm::identity<glm::mat4>();
-	transform = glm::translate(transform, gen->pos);
-	std::shared_ptr<J3DModelInstance> model;
-	switch (gen->entityType)
-	{
-	case ONYN: {
-			transform = glm::rotate(transform, glm::radians(static_pointer_cast<POnion>(gen->genData)->rotation.x), glm::vec3(1,0,0));
-			transform = glm::rotate(transform, glm::radians(static_pointer_cast<POnion>(gen->genData)->rotation.y), glm::vec3(0,1,0));
-			transform = glm::rotate(transform, glm::radians(static_pointer_cast<POnion>(gen->genData)->rotation.z), glm::vec3(0,0,1));
-			POnion* onion = static_pointer_cast<POnion>(gen->genData).get();
-			if(onion->index == 4){
-				model = ModelCache["SHIP"];
-			} else {
-				model = ModelCache["ONYN"];
-			}
-		}
-		break;
-	
-	case PLNT:
-		model = ModelCache["PLANT"];
-		break;
-	case WEED: {
-			PWeed* weed = static_pointer_cast<PWeed>(gen->genData).get();
-			if(weed->type != 1){ //TODO: pick the correct rock model?
-				model = ModelCache["WEED0"];
-			} else {
-				model = ModelCache["WEED3"];
-			}
-		}
-		break;
-	case CAVE:
-		model = ModelCache["CAVE"];
-		break;
-	case BARL:
-		transform = glm::rotate(transform, glm::radians(static_pointer_cast<PBarrel>(gen->genData)->rotation.x), glm::vec3(1,0,0));
-		transform = glm::rotate(transform, glm::radians(static_pointer_cast<PBarrel>(gen->genData)->rotation.y), glm::vec3(0,1,0));
-		transform = glm::rotate(transform, glm::radians(static_pointer_cast<PBarrel>(gen->genData)->rotation.z), glm::vec3(0,0,1));
-		model = ModelCache["BARREL"];
-		break;
-	case PELT:
-		transform = glm::rotate(transform, glm::radians(static_pointer_cast<PPelt>(gen->genData)->rotation.x), glm::vec3(1,0,0));
-		transform = glm::rotate(transform, glm::radians(static_pointer_cast<PPelt>(gen->genData)->rotation.y), glm::vec3(0,1,0));
-		transform = glm::rotate(transform, glm::radians(static_pointer_cast<PPelt>(gen->genData)->rotation.z), glm::vec3(0,0,1));
-		model = ModelCache[TreasureInternalName[static_pointer_cast<PPelt>(gen->genData)->peltID]];
-		break;
-	case GATE:
-		transform = glm::rotate(transform, glm::radians(static_pointer_cast<PGate>(gen->genData)->rotation.x), glm::vec3(1,0,0));
-		transform = glm::rotate(transform, glm::radians(static_pointer_cast<PGate>(gen->genData)->rotation.y), glm::vec3(0,1,0));
-		transform = glm::rotate(transform, glm::radians(static_pointer_cast<PGate>(gen->genData)->rotation.z), glm::vec3(0,0,1));
-		model = ModelCache["GATE"];
-		break;
-	case DGAT:
-		transform = glm::rotate(transform, glm::radians(static_pointer_cast<PGate>(gen->genData)->rotation.x), glm::vec3(1,0,0));
-		transform = glm::rotate(transform, glm::radians(static_pointer_cast<PGate>(gen->genData)->rotation.y), glm::vec3(0,1,0));
-		transform = glm::rotate(transform, glm::radians(static_pointer_cast<PGate>(gen->genData)->rotation.z), glm::vec3(0,0,1));
-		model = ModelCache["GATE_ELEC"];
-		break;
-	case BRDG: {
-			PBridge* bridge = static_pointer_cast<PBridge>(gen->genData).get();
-			transform = glm::rotate(transform, glm::radians(bridge->rotation.x), glm::vec3(1,0,0));
-			transform = glm::rotate(transform, glm::radians(bridge->rotation.y), glm::vec3(0,1,0));
-			transform = glm::rotate(transform, glm::radians(bridge->rotation.z), glm::vec3(0,0,1));
-
-			switch(bridge->type){
-				case 0:
-					model = ModelCache["BRDG_SHORT"];
-					break;
-				case 1:
-					model = ModelCache["BRDG_SLOPE"];
-					break;
-				case 2:
-					model = ModelCache["BRDG_LONG"];
-					break;
-			}
-		}
-		break;
-	case TEKI: {
-			PTeki* teki = static_pointer_cast<PTeki>(gen->genData).get();
-			transform = glm::rotate(transform, glm::radians(teki->direction), glm::vec3(0,1,0));
-			model = ModelCache[EnemyInternalName[teki->id]];
-		}
-		break;
-	case DWFL:{
-			PDownfloor* dwfl = static_pointer_cast<PDownfloor>(gen->genData).get();
-			transform = glm::rotate(transform, glm::radians(dwfl->rotation.x), glm::vec3(1,0,0));
-			transform = glm::rotate(transform, glm::radians(dwfl->rotation.y), glm::vec3(0,1,0));
-			transform = glm::rotate(transform, glm::radians(dwfl->rotation.z), glm::vec3(0,0,1));
-
-			model = ModelCache[std::format("DWFL{}", dwfl->dwflType)];
-		}
-		break;
-	default:
-		model = nullptr;
-		break;
-	}
-	if(model != nullptr){
-		J3DUniformBufferObject::SetEnvelopeMatrices(model->GetRestPose().data(), model->GetRestPose().size());		
-		J3DUniformBufferObject::SetModelMatrix(&transform);
-		model->Render(dt);
-	}
-}
-
 void PMapManager::RenderMap(float dt, USceneCamera* camera){
-	J3DUniformBufferObject::SetProjAndViewMatrices(projection, view);
-	if(ModelCache.contains("map")){
-		glm::mat4 map = glm::identity<glm::mat4>();
-		//instance map
-		//ModelCache["map"]->Render(dt);
-	}
-
+	J3DUniformBufferObject::SetProjAndViewMatrices(camera->GetProjectionMatrix(), camera->GetViewMatrix());
+	
+	/*
 	for (auto gen : defaultGens.generators){
 		RenderGen(gen, dt);
 	}
@@ -370,7 +260,7 @@ void PMapManager::RenderMap(float dt, USceneCamera* camera){
 	for (auto gen : plantsGen.generators){
 		RenderGen(gen, dt);
 	}
-
+	
 	for(auto [loopName, loop] : loops){
 		if(loopVisibility[loopName]){
 			for(auto gen : loop.generators){
@@ -378,7 +268,7 @@ void PMapManager::RenderMap(float dt, USceneCamera* camera){
 			}
 		}
 	}
-
+	
 	for(auto [loopName, loop] : nonloops){
 		if(nonLoopVisibility[loopName]){
 			for(auto gen : loop.generators){
@@ -386,6 +276,20 @@ void PMapManager::RenderMap(float dt, USceneCamera* camera){
 			}
 		}
 	}
+	*/
+
+	std::vector<std::shared_ptr<J3DModelInstance>> renderables;
+
+	if(mMapModel != nullptr){
+		renderables.push_back(mMapModel);
+	}
+	
+	auto proj = camera->GetProjectionMatrix();
+	auto view = camera->GetViewMatrix();
+
+	auto packets = J3D::Rendering::SortPackets(renderables, camera->GetPosition());
+	
+	J3D::Rendering::Render(dt, proj, view, packets);
 
 	pathRenderer.Draw(camera);
 }

@@ -6,6 +6,7 @@
 #include <glm/glm.hpp>
 #include <filesystem>
 
+#define GLM_ENABLE_EXPERIMENTAL
 #include <J3D/J3DModelLoader.hpp>
 #include <J3D/Data/J3DModelData.hpp>
 #include <J3D/Material/J3DUniformBufferObject.hpp>
@@ -34,6 +35,7 @@ class PMapManager {
 	void RenderGen(std::shared_ptr<PGenerator> gen, float dt);
 
 	CPathRenderer pathRenderer;
+	std::shared_ptr<J3DModelInstance> mMapModel { nullptr };
 
 public:
 	PGenCollection defaultGens, initGens, plantsGen;

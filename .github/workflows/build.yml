@@ -1,0 +1,97 @@
+name: Build
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+  workflow_dispatch:
+    inputs:
+      version:
+        description: Version
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        include:
+          - name: Windows Build
+            os: windows-latest
+            architecture: x64
+            artifact: windows
+            upload_path_suffix: '/*'
+          - name: Linux Build
+            os: ubuntu-20.04
+            architecture: x64
+            artifact: linux
+            upload_path_suffix: '/*'
+    
+    runs-on: ${{ matrix.os }}
+    
+    defaults:
+      run:
+        shell: bash
+    
+    env:
+      ACTIONS_ALLOW_UNSECURE_COMMANDS: true
+    
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          submodules: recursive
+      - name: Install dependencies
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt update
+          sudo apt install libxrandr-dev libxinerama-dev libxcursor-dev libxi-dev libxext-dev mesa-common-dev libcurl4-openssl-dev libwayland-dev libxkbcommon-dev libegl1-mesa-dev
+      - name: Set up MSVC for Windows
+        if: runner.os == 'Windows'
+        uses: ilammy/msvc-dev-cmd@v1
+      - name: Setup cmake
+        uses: lukka/get-cmake@latest
+      - name: Setup vcpkg
+        if: runner.os == 'Windows'
+        uses: lukka/run-vcpkg@v11.5
+        with:
+          vcpkgGitCommitId: 'ad46340bfce415333d6a2139592c22a499fb0df0'
+          vcpkgDirectory: '${{ github.workspace }}/vcpkg'
+          vcpkgJsonGlob: '**/vcpkg.json'
+      - name: Integrate vcpkg
+        if: runner.os == 'Windows'
+        run: |
+          vcpkg integrate install
+      - name: Run CMake
+        uses: lukka/run-cmake@v3
+        with:
+          cmakeListsOrSettingsJson: CMakeListsTxtAdvanced
+          cmakeListsTxtPath: '${{ github.workspace }}/CMakeLists.txt'
+          buildDirectory: '${{ github.workspace }}/build'
+          useVcpkgToolchainFile: true
+          cmakeAppendedArgs: '-G Ninja -DCMAKE_BUILD_TYPE=Release'
+      - name: Create App Package Linux
+        if: runner.os == 'Linux'
+        run: |
+          mkdir jenny-build
+          cp -r res jenny-build/res
+          ls build
+          cp build/jenny jenny-build/jenny
+      - name: Create App Package Windows
+        if: runner.os == 'Windows'
+        run: |
+          mkdir jenny-build
+          cp -r res jenny-build/res
+          ls build
+          cp build/jenny.exe jenny-build/jenny.exe
+          for f in "build/"*.dll; do cp $f "jenny-build/${f##*/}"; done
+      - name: Upload App Windows
+        if: runner.os == 'Windows'
+        uses: actions/upload-artifact@v3
+        with:
+          name: jenny-windows
+          path: jenny-build
+      - name: Upload App Linux
+        if: runner.os == 'Linux'
+        uses: actions/upload-artifact@v3
+        with:
+          name: jenny-linux
+          path: jenny-build

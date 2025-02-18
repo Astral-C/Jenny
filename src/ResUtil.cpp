@@ -46,7 +46,7 @@ void SResUtility::SOptions::RenderOptionMenu(){
 
 		if(mSelectRootDialogOpen && !ImGuiFileDialog::Instance()->IsOpened("OpenRootDialog")){
 			ImGuiFileDialog::Instance()->Close();
-			ImGuiFileDialog::Instance()->OpenDialog("OpenRootDialog", "Choose ObjectData path", nullptr, ".");
+			ImGuiFileDialog::Instance()->OpenDialog("OpenRootDialog", "Choose ObjectData path", nullptr);
 		}
 
 		if (ImGuiFileDialog::Instance()->Display("OpenRootDialog")) {

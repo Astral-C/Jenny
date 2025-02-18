@@ -6,10 +6,10 @@
 #include "util/UUIUtil.hpp"
 
 #include <J3D/J3DModelLoader.hpp>
-#include <J3D/J3DModelData.hpp>
-#include <J3D/J3DUniformBufferObject.hpp>
-#include <J3D/J3DLight.hpp>
-#include <J3D/J3DModelInstance.hpp>
+#include <J3D/Data/J3DModelData.hpp>
+#include <J3D/Material/J3DUniformBufferObject.hpp>
+#include <J3D/Rendering/J3DLight.hpp>
+#include <J3D/Data/J3DModelInstance.hpp>
 
 #include <bits/fs_path.h>
 #include <glad/glad.h>
@@ -46,8 +46,6 @@ UJennyContext::UJennyContext(){
 	mBillboardManager.mBillboards[1].Texture = 1;
 	mBillboardManager.mBillboards[1].SpriteSize = 204800;
 
-	GCResourceManager.Init();
-
 	ImGuiIO& io = ImGui::GetIO();
     io.Fonts->AddFontFromFileTTF((std::filesystem::current_path() / "res/NotoSansJP-Regular.otf").string().c_str(), 16.0f, NULL, io.Fonts->GetGlyphRangesJapanese());
 	io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
@@ -66,7 +64,7 @@ void UJennyContext::Render(float deltaTime) {
 	const ImGuiViewport* mainViewport = ImGui::GetMainViewport();
 
 	ImGuiDockNodeFlags dockFlags = ImGuiDockNodeFlags_PassthruCentralNode | ImGuiDockNodeFlags_AutoHideTabBar | ImGuiDockNodeFlags_NoDockingInCentralNode;
-	mMainDockSpaceID = ImGui::DockSpaceOverViewport(mainViewport, dockFlags);
+	mMainDockSpaceID = ImGui::DockSpaceOverViewport(0, mainViewport, dockFlags);
 	
 	if(!bIsDockingSetUp){
 		ImGui::DockBuilderRemoveNode(mMainDockSpaceID); // clear any previous layout
@@ -183,7 +181,7 @@ void UJennyContext::Render(float deltaTime) {
 
 	SetLights();
 	
-	J3DUniformBufferObject::SetProjAndViewMatrices(&projection, &view);
+	J3DUniformBufferObject::SetProjAndViewMatrices(projection, view);
 	
 	//Render Models here
 	mGrid.Render(mCamera.GetPosition(), mCamera.GetProjectionMatrix(), mCamera.GetViewMatrix());

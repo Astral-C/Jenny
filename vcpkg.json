@@ -1,0 +1,10 @@
+{
+    "name" : "starforge",
+    "version-string" : "starforge-win",
+    "dependencies": [
+        "icu",
+        "curl"
+    ],
+	
+	"builtin-baseline": "ad46340bfce415333d6a2139592c22a499fb0df0"
+}

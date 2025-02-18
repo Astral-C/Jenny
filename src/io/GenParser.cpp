@@ -1,3 +1,4 @@
+#define GLM_ENABLE_EXPERIMENTAL
 #include <io/GenParser.hpp>
 #include <GenUtil.hpp>
 #include <algorithm>
