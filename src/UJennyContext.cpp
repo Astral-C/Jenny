@@ -11,7 +11,7 @@
 #include <J3D/Rendering/J3DLight.hpp>
 #include <J3D/Data/J3DModelInstance.hpp>
 
-#include <bits/fs_path.h>
+#include <filesystem>
 #include <glad/glad.h>
 #include <imgui.h>
 #include <imgui_internal.h>
