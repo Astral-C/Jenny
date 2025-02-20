@@ -83,13 +83,13 @@ jobs:
           cp build/*.dll jenny-build
       - name: Upload App Windows
         if: runner.os == 'Windows'
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: jenny-windows
           path: jenny-build
       - name: Upload App Linux
         if: runner.os == 'Linux'
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: jenny-linux
           path: jenny-build
