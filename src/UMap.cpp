@@ -211,7 +211,7 @@ void PMapManager::ParseGens(std::shared_ptr<Disk::Image> image, std::filesystem:
 		std::cout << "Loading loop gens " << file << std::endl;
 		if(std::filesystem::path(file->GetName()).extension() == ".txt"){
 			loops.insert({std::filesystem::path(file->GetName()).stem().string(), PGenParser::ParseGenFile(file)});
-			loopVisibility.insert({std::filesystem::path(file->GetName()), false});
+			loopVisibility.insert({std::filesystem::path(file->GetName()).string(), false});
 		}
 	}
 
@@ -219,7 +219,7 @@ void PMapManager::ParseGens(std::shared_ptr<Disk::Image> image, std::filesystem:
 		std::cout << "Loading nonloop gens " << file << std::endl;
 		if(std::filesystem::path(file->GetName()).extension() == ".txt"){
 			nonloops.insert({std::filesystem::path(file->GetName()).stem().string(), PGenParser::ParseGenFile(file)});
-			nonLoopVisibility.insert({std::filesystem::path(file->GetName()), false});
+			nonLoopVisibility.insert({std::filesystem::path(file->GetName()).string(), false});
 		}
 	}
 	
