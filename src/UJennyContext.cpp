@@ -90,7 +90,7 @@ UJennyContext::UJennyContext(){
 	mImage = Disk::Image::Create();
 	
 	if(Options.mRootDir != "" && (Options.mRootDir.extension() == ".gcm" || Options.mRootDir.extension() == ".iso")){
-		bStream::CFileStream stream(Options.mRootDir, bStream::Endianess::Big, bStream::OpenMode::In);
+		bStream::CFileStream stream(Options.mRootDir.string(), bStream::Endianess::Big, bStream::OpenMode::In);
 		mImage->Load(&stream);
 	}
 	J3DUniformBufferObject::CreateUBO();
@@ -114,7 +114,7 @@ UJennyContext::~UJennyContext(){
 bool UJennyContext::Update(float deltaTime) {
 	if(Options.mRootChanged){
 		if(Options.mRootDir != "" && std::filesystem::exists(Options.mRootDir) && (Options.mRootDir.extension() == ".gcm" || Options.mRootDir.extension() == ".iso")){
-			bStream::CFileStream stream(Options.mRootDir, bStream::Endianess::Big, bStream::OpenMode::In);
+			bStream::CFileStream stream(Options.mRootDir.string(), bStream::Endianess::Big, bStream::OpenMode::In);
 			mImage->Load(&stream);
 		}
 		Options.mRootChanged = false;
