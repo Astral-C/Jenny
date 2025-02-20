@@ -203,7 +203,7 @@ namespace PGenParser {
                     gen.genData = std::make_shared<PPelt>();
                     std::string temp;
                     // Why?
-                    genFile.seekg(-2, std::ios_base::seekdir::_S_cur);
+                    genFile.seekg(genFile.tellg()-2);
                     genFile >> temp;
                     std::static_pointer_cast<PPelt>(gen.genData)->mgrID = stoi(temp);
                     getline(genFile, line);
