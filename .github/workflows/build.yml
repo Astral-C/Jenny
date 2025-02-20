@@ -80,7 +80,7 @@ jobs:
           mkdir jenny-build
           cp -r res jenny-build/res
           cp build/jenny.exe jenny-build/jenny.exe
-          for f in "build/"*.dll; do cp $f "starforge-build/${f##*/}"; done
+          for f in "build/"*.dll; do if [ -f "$f" ] || break; cp $f "starforge-build/${f##*/}"; done
       - name: Upload App Windows
         if: runner.os == 'Windows'
         uses: actions/upload-artifact@v4
