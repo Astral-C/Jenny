@@ -18,7 +18,6 @@
 #include <bstream.h>
 #include <optional>
 #include <sys/types.h>
-#include "fmt/core.h"
 #include "ResUtil.hpp"
 
 glm::vec3 UJennyContext::ManipulationGizmo(glm::vec3 position){
