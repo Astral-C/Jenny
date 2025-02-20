@@ -8,6 +8,7 @@
 #include <format>
 #include <glm/glm.hpp>
 #include <J3D/Data/J3DModelInstance.hpp>
+#include <GCM.hpp>
 
 const std::string EntityTypeNames[] = {
     "Onion",
@@ -363,7 +364,6 @@ const std::map<std::string, PObjectTag> PObjectTagStr = {
 const std::map<std::string, PGenVersion> PGenVersionStr = {{"{v0.1}", VER1}, {"{v0.3}", VER3}};
 
 struct PEntity {
-    std::shared_ptr<J3DModelInstance> mModel { nullptr };
     virtual std::string GetName(PObjectTag type){ return EntityTypeNames[type]; }
 };
 
@@ -537,7 +537,7 @@ struct PTeki : PEntity {
 struct PGenerator {
     PGenVersion ver;         // Generator version
     int reserved;            // Affects loading behavior, 0 = Loads once, (1, ..) = Can load multiple times, 
-                             // (.., -1) = An affront to GOD that is somehow used
+    // (.., -1) = An affront to GOD that is somehow used
     uint32_t respawnDays;        // 0 = always spawn, even after leaving cave, (1, ..) = Wait this many days to respawn
     // ubyte[] comment; #NOT NECESSARY FOR OBJECT OPERATION
     glm::vec3 pos;                // Spawn position of object
@@ -545,6 +545,9 @@ struct PGenerator {
     PObjectTag entityType;  // INTERNAL: Used at runtime to know what the stored object is
     std::shared_ptr<PEntity> genData;    // Contains the specific object information
     std::string GetName() { if(genData != nullptr){ return genData->GetName(entityType); } else { return EntityTypeNames[entityType]; } }
+    std::shared_ptr<J3DModelInstance> mModel { nullptr };
+    glm::mat4 mTransform;
+    uint32_t mID { 0xFFFFFFFF };
 };
 
 struct PGenCollection {
@@ -565,6 +568,6 @@ struct PRoute {
 };
 
 namespace PGenParser {
-    PGenCollection ParseGenFile(std::filesystem::path genPath);
-    PRoute ParseRouteFile(std::filesystem::path routePath);
+    PGenCollection ParseGenFile(std::shared_ptr<Disk::File> file);
+    PRoute ParseRouteFile(std::shared_ptr<Disk::File> file);
 };

@@ -8,6 +8,7 @@
 #include <UGrid.hpp>
 #include <UPointSpriteManager.hpp>
 #include <UMap.hpp>
+#include <GCM.hpp>
 
 #include <ImGuiFileDialog.h>
 
@@ -27,7 +28,7 @@ class UJennyContext {
 	PMapManager mMapManager;
 	std::shared_ptr<PGenerator> selected { nullptr };
 
-	//std::vector<std::unique_ptr<GalaxyZone>();
+	std::shared_ptr<Disk::Image> mImage { nullptr };
 
 	std::string mMapSelected { "tutorial" };
 
@@ -40,6 +41,11 @@ class UJennyContext {
 	bool mSetLights { false };
 
 	bool bOptionsOpen { false };
+
+	uint32_t mFbo, mRbo, mViewTex, mPickTex;
+
+	float mPrevWinWidth { -1.0f };
+	float mPrevWinHeight { -1.0f };
 
 	void RenderMainWindow(float deltaTime);
 	void RenderPanels(float deltaTime);
@@ -56,7 +62,7 @@ class UJennyContext {
 
 public:
 	UJennyContext();
-	~UJennyContext() {}
+	~UJennyContext();
 
 	bool Update(float deltaTime);
 	void Render(float deltaTime);

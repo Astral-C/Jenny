@@ -174,4 +174,5 @@ void CPathRenderer::Draw(USceneCamera *Camera) {
     }
 
     glBindVertexArray(0);
+    glFlush();
 }

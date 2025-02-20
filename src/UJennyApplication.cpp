@@ -13,7 +13,7 @@
 #include "ResUtil.hpp"
 
 void DealWithGLErrors(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar* message, const void* userParam) {
-	std::cout << "GL CALLBACK: " << message << std::endl;
+	//std::cout << "GL CALLBACK: " << message << std::endl;
 }
 
 UJennyApplication::UJennyApplication() {
@@ -30,7 +30,8 @@ bool UJennyApplication::Setup() {
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 	glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, GLFW_TRUE);
-	glfwWindowHint(GLFW_DEPTH_BITS, 24);
+	glfwWindowHint(GLFW_DEPTH_BITS, 32);
+	glfwWindowHint(GLFW_SAMPLES, 4);	
 
 	mWindow = glfwCreateWindow(1280, 720, "Jenny", nullptr, nullptr);
 	if (mWindow == nullptr) {
@@ -59,6 +60,8 @@ bool UJennyApplication::Setup() {
 	ImGui::StyleColorsDark();
 	ImGui_ImplGlfw_InitForOpenGL(mWindow, true);
 	ImGui_ImplOpenGL3_Init("#version 150");
+
+	glEnable(GL_MULTISAMPLE);
 
 	// Create viewer context
 	mContext = new UJennyContext();
@@ -107,7 +110,8 @@ bool UJennyApplication::Execute(float deltaTime) {
 	glViewport(0, 0, width, height);
 
 	// Clear buffers
-	glClearColor(0.267, 0.235, 0.408, 1.0f);
+	glDepthMask(true);
+	glClearColor(0.100f, 0.261f, 0.402f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	// Render viewer context

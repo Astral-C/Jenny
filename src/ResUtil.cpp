@@ -46,13 +46,14 @@ void SResUtility::SOptions::RenderOptionMenu(){
 
 		if(mSelectRootDialogOpen && !ImGuiFileDialog::Instance()->IsOpened("OpenRootDialog")){
 			ImGuiFileDialog::Instance()->Close();
-			ImGuiFileDialog::Instance()->OpenDialog("OpenRootDialog", "Choose ObjectData path", nullptr);
+			ImGuiFileDialog::Instance()->OpenDialog("OpenRootDialog", "Choose Pikmin 2 ISO", "GC ISO (*.iso){.iso}");
 		}
 
 		if (ImGuiFileDialog::Instance()->Display("OpenRootDialog")) {
 			if (ImGuiFileDialog::Instance()->IsOk()) {
 				mRootDir = ImGuiFileDialog::Instance()->GetFilePathName();
 
+				mRootChanged = true;
 				mSelectRootDialogOpen = false;
 			} else {
 				mSelectRootDialogOpen = false;

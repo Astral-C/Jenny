@@ -20,19 +20,20 @@
 #include "UPathRenderer.hpp"
 
 #include <Archive.hpp>
+#include <GCM.hpp>
 
 #include "UCamera.hpp"
 
 class PMapManager {
 	bool loadedAssets { false };
 	
-	void LoadEnemy(std::string modelDirName);
-	void LoadTreasure(std::string modelArchiveName);
-	void LoadKandoModel(std::string modelDirName, std::string modelName, std::string cacheName, std::string archiveName);
+	void LoadEnemy(std::shared_ptr<Disk::Folder> enemyDir);
+	void LoadTreasure(std::shared_ptr<Disk::File> treasureArc);
+	void LoadKandoModel(std::shared_ptr<Disk::Folder> kandoDir, std::string modelDirName, std::string modelName, std::string cacheName, std::string archiveName);
 
-	void ParseGens(std::filesystem::path genPath);
+	void ParseGens(std::shared_ptr<Disk::Image> image, std::filesystem::path genPath);
 
-	void RenderGen(std::shared_ptr<PGenerator> gen, float dt);
+	void GenLoadRenderable(std::shared_ptr<PGenerator> gen);
 
 	CPathRenderer pathRenderer;
 	std::shared_ptr<J3DModelInstance> mMapModel { nullptr };
@@ -50,9 +51,9 @@ public:
 	PRoute routes;
 
 	void RenderUI();
-	void RenderMap(float dt, USceneCamera* camera);
-	void LoadMap(std::string mapName);
-	void LoadAssets();
+	void RenderMap(float dt, USceneCamera* camera, bool picking=false);
+	void LoadMap(std::shared_ptr<Disk::Image> image, std::string mapName);
+	void LoadAssets(std::shared_ptr<Disk::Image> image);
 
 	PMapManager();
 	~PMapManager();

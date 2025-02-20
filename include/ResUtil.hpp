@@ -18,6 +18,7 @@ namespace SResUtility
 		bool mSelectRootDialogOpen;
 		
 		public:
+			bool mRootChanged { false };
 			std::filesystem::path mRootDir;
 
 			void RenderOptionMenu();
