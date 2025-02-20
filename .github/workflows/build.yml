@@ -43,7 +43,7 @@ jobs:
         if: runner.os == 'Linux'
         run: |
           sudo apt update
-          sudo apt install libxrandr-dev libxinerama-dev libxcursor-dev libxi-dev libxext-dev mesa-common-dev libcurl4-openssl-dev libwayland-dev libxkbcommon-dev libegl1-mesa-dev
+          sudo apt install libxrandr-dev libxinerama-dev libxcursor-dev libxi-dev libxext-dev mesa-common-dev libicu-dev libwayland-dev libxkbcommon-dev libegl1-mesa-dev libbz2-dev
       - name: Set up MSVC for Windows
         if: runner.os == 'Windows'
         uses: ilammy/msvc-dev-cmd@v1
@@ -53,7 +53,7 @@ jobs:
         if: runner.os == 'Windows'
         uses: lukka/run-vcpkg@v11.5
         with:
-          vcpkgGitCommitId: 'ad46340bfce415333d6a2139592c22a499fb0df0'
+          vcpkgGitCommitId: '80d54ff62d528339c626a6fbc3489a7f25956ade'
           vcpkgDirectory: '${{ github.workspace }}/vcpkg'
           vcpkgJsonGlob: '**/vcpkg.json'
       - name: Integrate vcpkg
@@ -73,25 +73,23 @@ jobs:
         run: |
           mkdir jenny-build
           cp -r res jenny-build/res
-          ls build
           cp build/jenny jenny-build/jenny
       - name: Create App Package Windows
         if: runner.os == 'Windows'
         run: |
           mkdir jenny-build
           cp -r res jenny-build/res
-          ls build
           cp build/jenny.exe jenny-build/jenny.exe
-          for f in "build/"*.dll; do cp $f "jenny-build/${f##*/}"; done
+          cp build/*.dll jenny-build
       - name: Upload App Windows
         if: runner.os == 'Windows'
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v3
         with:
           name: jenny-windows
           path: jenny-build
       - name: Upload App Linux
         if: runner.os == 'Linux'
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v3
         with:
           name: jenny-linux
           path: jenny-build
