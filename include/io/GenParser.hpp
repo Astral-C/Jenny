@@ -543,6 +543,7 @@ struct PGenerator {
     glm::vec3 pos;                // Spawn position of object
     glm::vec3 offset;             // Position offset from spawn position
     PObjectTag entityType;  // INTERNAL: Used at runtime to know what the stored object is
+    std::vector<int> args;
     std::shared_ptr<PEntity> genData;    // Contains the specific object information
     std::string GetName() { if(genData != nullptr){ return genData->GetName(entityType); } else { return EntityTypeNames[entityType]; } }
     std::shared_ptr<J3DModelInstance> mModel { nullptr };
@@ -568,6 +569,7 @@ struct PRoute {
 };
 
 namespace PGenParser {
+    bool WriteGenFile(PGenCollection gens, std::shared_ptr<Disk::File> file);
     PGenCollection ParseGenFile(std::shared_ptr<Disk::File> file);
     PRoute ParseRouteFile(std::shared_ptr<Disk::File> file);
 };

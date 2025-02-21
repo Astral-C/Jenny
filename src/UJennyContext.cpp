@@ -249,7 +249,13 @@ void UJennyContext::Render(float deltaTime) {
 	ImGui::Text("Gen Settings");
 
 	if(selected != nullptr){
-		ImGui::Text("%d", selected->entityType);
+		ImGui::Text("Entity Type: %d", selected->entityType);
+		ImGui::Text("Args");
+		ImGui::Separator();
+		for(int i = 0; i < selected->args.size(); i++){
+			ImGui::InputInt(std::format("##arg{}", i).c_str(), &selected->args[i]);
+		}
+	
 	}
 
 	ImGui::Separator();

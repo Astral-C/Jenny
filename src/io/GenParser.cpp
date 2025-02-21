@@ -11,8 +11,51 @@ static std::atomic<int32_t> PickingID = 0;
 
 namespace PGenParser {
 
-    bool WriteGenFile(std::filesystem::path genPath){
-        // write gen file
+    bool WriteGenFile(PGenCollection gens, std::shared_ptr<Disk::File> file){
+        std::stringstream genFile;
+        genFile << "# generatorMgr <Generator(Default)>\n";
+        if(gens.ver == VER1){
+            genFile << "{v0.1} # version\n";
+        } else {
+            genFile << "{v0.3} # version\n";
+        }
+
+        genFile << std::format("{:.6f} {:.6f} {:.6f} # startPos\n", gens.startPos.x, gens.startPos.y, gens.startPos.z);
+        genFile << std::format("{:.6f} # startDir\n", gens.startDir);
+        genFile << std::format("{0} # {0} generators\n", gens.generators.size());
+
+        for (auto gen : gens.generators){
+            genFile << std::format("# {}\n", gen->GetName());
+            genFile << "{\n";
+
+            genFile << "\t" << (gen->ver == VER1 ? "{v0.1}" : "{v0.3}");
+            genFile << std::format("\n\t{} # reserved\t{} # respawn days\n", gen->reserved, gen->respawnDays);
+            
+            genFile << "\t";
+            for(int i = 0; i < gen->args.size(); i++){
+                genFile << gen->args[i];
+            }
+            genFile << "\n";
+
+            genFile << std::format("\t{:.6f} {:.6f} {:.6f} # pos\n", gen->pos.x, gen->pos.y, gen->pos.z);
+            genFile << std::format("\t{:.6f} {:.6f} {:.6f} # offset\n", gen->offset.x, gen->offset.y, gen->offset.z);
+
+            switch (gen->entityType){
+            case TEKI:
+                
+                break;
+            
+            case ONYN:
+                genFile << "\t{item}{0002} # onyn\n\t{\n";
+                genFile << "\t\t{onyn} # item id\n";
+                //genFile << std::format("\t{:.6f} {:.6f} {:.6f} # pos\n", gen->genData, gen->pos.y, gen->pos.z);
+            default:
+                break;
+            }
+
+            genFile << "}";
+        }
+        
         return true;
     }
 
@@ -33,7 +76,7 @@ namespace PGenParser {
             
         // For some reason iconv can't properly convert all the text files we throw at it, not sure why.
         //genTxtAsStr = LGenUtility::SjisToUtf8(genTxtAsStr);
-            
+        
         std::stringstream genFile(genTxtAsStr);
 
         std::string line;
@@ -77,7 +120,16 @@ namespace PGenParser {
             genFile >> gen.respawnDays;
             getline(genFile, line);
             //genFile >> gen.
-            getline(genFile, line); //args
+
+            while(getline(genFile, line, ' ')){ //args
+                if(line.find("#") != std::string::npos){
+                    break;
+                }
+                gen.args.push_back(std::stoi(line));
+            }
+            getline(genFile, line);
+            std::cout << "Just finished reading: " << line << std::endl; 
+
             genFile >> gen.pos.x;
             genFile >> gen.pos.y;
             genFile >> gen.pos.z;
